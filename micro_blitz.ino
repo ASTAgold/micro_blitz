@@ -1,7 +1,7 @@
 #include <HCSR04>
 
 //SENSOR PINS
-float C_THRESH = 5; 
+float C_THRESH = 6; 
 float S_THRESH = 13;  
 
 int R_ECHO = 0;
