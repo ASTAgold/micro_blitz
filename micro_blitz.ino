@@ -1,8 +1,13 @@
-#include <HCSR04>
+#include <HCSR04.h>
+
+typedef UltraSonicDistanceSensor HCSR04;
 
 //SENSOR PINS
 float C_THRESH = 6; 
-float S_THRESH = 13;  
+float S_THRESH = 13;
+
+float R_dist;
+float L_dist;
 
 int R_ECHO = 0;
 int R_TRIG = 1;
@@ -27,6 +32,8 @@ int L_IN2 = 11;
 
 void setup()
 { 
+  Serial.begin(9600);
+
   pinMode(L_EN, OUTPUT);
   pinMode(L_IN1, OUTPUT);
   pinMode(L_IN2, OUTPUT);
@@ -40,7 +47,11 @@ void setup()
 
 void loop()
 {
+  R_dist = R_hc.measureDistanceCm();
+  L_dist = L_hc.measureDistanceCm();
 
+  Serial.print(R_dist);
+  Serial.println(L_dist);
 }
 
 
