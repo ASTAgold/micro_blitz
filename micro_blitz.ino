@@ -13,6 +13,7 @@ float IN_V = 100;
 
 float R_dist;
 float L_dist;
+float C_dist;
 
 int R_ECHO = 4;
 int R_TRIG = 5;
@@ -41,11 +42,12 @@ int L_v = 0;
 
 enum states
 {
-  advancing
-  turning_left
-  turning_right
+  advancing,
+  turning_left,
+  turning_right,
   stopping
-}
+};
+enum states state = advancing; 
 
 void advance()
 {
@@ -65,7 +67,7 @@ void turn_left()
 {
   if(R_dist > S_THRESH)
   {
-    while(!(L_dist < S_dist && R_dist < S_dist))
+    while(!(L_dist < S_THRESH && R_dist < S_THRESH))
     {
       R_v = OUT_V;
       L_v = IN_V;
@@ -75,7 +77,7 @@ void turn_left()
     }
   }else
   {
-  while(!(L_dist < S_dist))
+  while(!(L_dist < S_THRESH))
     {
       R_v = OUT_V;
       L_v = IN_V;
@@ -88,7 +90,7 @@ void turn_left()
 
 void setup()
 { 
-  enum states state = advancing;
+  state = advancing;
 
   Serial.begin(9600);
 
