@@ -4,7 +4,8 @@ typedef UltraSonicDistanceSensor HCSR04;
 
 //SENSOR PINS
 float C_THRESH = 6; 
-float S_THRESH = 10;
+// TO DO
+float S_THRESH = 11;
 float ERR_TRESH = 2;
 
 float R_dist;
@@ -36,8 +37,10 @@ int L_IN2 = 13;
 int L_v = 0;
 
 
+
 void advance(float R_dist, float L_dist)
 {
+  //correction
   if((R_dist - L_dist) > ERR_TRESH)
   {
   R_v = (float)Vmax*((float)L_dist/(L_dist + R_dist));
@@ -78,6 +81,7 @@ void loop()
   {
     advance(R_dist, L_dist);
   }
+
   analogWrite(R_EN, R_v);
   analogWrite(L_EN, L_v);
 
