@@ -8,6 +8,9 @@ float C_THRESH = 6;
 float S_THRESH = 11;
 float ERR_TRESH = 2;
 
+float OUT_V = 255;
+float IN_V = 100;
+
 float R_dist;
 float L_dist;
 
@@ -36,11 +39,17 @@ int L_IN1 = 12;
 int L_IN2 = 13;
 int L_v = 0;
 
-
-
-void advance(float R_dist, float L_dist)
+enum states
 {
-  //correction
+  advancing
+  turning_left
+  turning_right
+  stopping
+}
+
+void advance()
+{
+  //stabilize
   if((R_dist - L_dist) > ERR_TRESH)
   {
   R_v = (float)Vmax*((float)L_dist/(L_dist + R_dist));
@@ -52,9 +61,35 @@ void advance(float R_dist, float L_dist)
 
   Serial.println("straight");  
 }
+void turn_left()
+{
+  if(R_dist > S_THRESH)
+  {
+    while(!(L_dist < S_dist && R_dist < S_dist))
+    {
+      R_v = OUT_V;
+      L_v = IN_V;
+
+      analogWrite(R_EN, R_v);
+      analogWrite(L_EN, L_v);
+    }
+  }else
+  {
+  while(!(L_dist < S_dist))
+    {
+      R_v = OUT_V;
+      L_v = IN_V;
+    
+      analogWrite(R_EN, R_v);
+      analogWrite(L_EN, L_v);
+    }
+  }
+}
 
 void setup()
 { 
+  enum states state = advancing;
+
   Serial.begin(9600);
 
   pinMode(L_EN, OUTPUT);
@@ -63,6 +98,7 @@ void setup()
 
 
 }
+
 
 void loop()
 {
@@ -76,10 +112,18 @@ void loop()
   R_dist = R_dist >= 0? R_dist : 0;
   L_dist = L_hc.measureDistanceCm();
   L_dist = L_dist >= 0? L_dist : 0;
+  C_dist = C_hc.measureDistanceCm();
+  C_dist = C_dist >= 0? C_dist : 0;
 
-  if(L_dist <= S_THRESH)
+  // PRIORIRY: LEFT > FORWARD > RIGHT
+  state = (L_dist < S_THRESH) ? advancing : turning_left;
+
+  if(state == advancing)
   {
-    advance(R_dist, L_dist);
+    advance();
+  }else if (state == turning_left)
+  {
+    turn_left();
   }
 
   analogWrite(R_EN, R_v);
