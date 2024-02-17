@@ -6,10 +6,10 @@ typedef UltraSonicDistanceSensor HCSR04;
 float C_THRESH = 6; 
 // TO DO
 float S_THRESH = 11;
-float ERR_TRESH = 2;
+float ERR_TRESH = 4;
 
 float OUT_V = 255;
-float IN_V = 100;
+float IN_V = 0;
 
 float R_dist;
 float L_dist;
@@ -28,7 +28,7 @@ int C_TRIG  = 7;
 HCSR04 C_hc(C_TRIG, C_ECHO);
 
 // MOTOR PINS
-int Vmax = 255;
+int Vmax =  100;
 
 int R_EN = 9; 
 int R_IN1 = 8;
@@ -52,16 +52,22 @@ enum states state = advancing;
 void advance()
 {
   //stabilize
-  if((R_dist - L_dist) > ERR_TRESH)
+  if(abs(R_dist - L_dist) > ERR_TRESH)
   {
   R_v = (float)Vmax*((float)L_dist/(L_dist + R_dist));
   L_v = (float)Vmax*((float)R_dist/(L_dist + R_dist));
 
-  Serial.println("sadboy");  
-  }else
-    R_v = L_v = 255;
+  // Serial.println("stabilizing");
+  // delay(200);
 
-  Serial.println("straight");  
+  }else
+  {
+  R_v = L_v = Vmax;
+
+  // Serial.println("STRAIGHT");
+  // delay(200);
+  }
+
 }
 void turn_left()
 {
@@ -75,7 +81,7 @@ void turn_left()
       analogWrite(R_EN, R_v);
       analogWrite(L_EN, L_v);
     }
-  }else
+  }else 
   {
   while(!(L_dist < S_THRESH))
     {
@@ -92,7 +98,7 @@ void setup()
 { 
   state = advancing;
 
-  Serial.begin(9600);
+  Serial.begin(4800);
 
   pinMode(L_EN, OUTPUT);
   pinMode(L_IN1, OUTPUT);
@@ -119,22 +125,19 @@ void loop()
 
   // PRIORIRY: LEFT > FORWARD > RIGHT
   state = (L_dist < S_THRESH) ? advancing : turning_left;
-
-  if(state == advancing)
-  {
-    advance();
-  }else if (state == turning_left)
-  {
-    turn_left();
-  }
+  
+  advance();
 
   analogWrite(R_EN, R_v);
   analogWrite(L_EN, L_v);
 
 
-  // Serial.print(R_v);
-  // Serial.print("  ");
-  // Serial.println(L_v); 
+  Serial.print(R_dist);
+  Serial.print("   ");
+  Serial.print(L_dist);
+  Serial.print("   ");
+  Serial.println(C_dist);
+
   
 }
 
