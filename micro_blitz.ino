@@ -3,16 +3,16 @@
 typedef UltraSonicDistanceSensor HCSR04;
 
 //SENSOR PINS
-float F_THRESH = 6; 
+float F_THRESH = 12; 
 // TO DO
-float S_THRESH = 11;
+float S_THRESH = 9;
 float ERR_TRESH = 4;
 
 // MOTOR PINS
 int Vmax =  100;
-int Vmin =  ;
-float OUT_V = Vmax;
-float IN_V = Vmin;
+
+int OUT_V = Vmax;
+int IN_V = 60;
 
 float R_dist;
 float L_dist;
@@ -51,14 +51,23 @@ int L_v = 0;
 };
 enum states state = advancing; 
 */
+
+float ease(float x)
+{
+ return  x < 0.5
+  ? (1 - sqrt(1 - (2 * x, 2)*(2 * x, 2))) / 2
+  : (sqrt(1 - (-2 * x + 2)*(-2 * x + 2)) + 1) / 2;
+}
+
 void advance()
 {
   //stabilize
   if(abs(R_dist - L_dist) > ERR_TRESH)
   {
-  R_v = (float)Vmax*((float)L_dist/(L_dist + R_dist));
-  L_v = (float)Vmax*((float)R_dist/(L_dist + R_dist));
-
+  R_v = (float)Vmax*ease((float)L_dist/(L_dist + R_dist));
+  L_v = (float)Vmax*ease((float)R_dist/(L_dist + R_dist));
+  analogWrite(R_EN, R_v);
+  analogWrite(L_EN, L_v);
   // Serial.println("stabilizing");
   // delay(200);
 
@@ -70,34 +79,46 @@ void advance()
   }
 
 }
-void turn_left()
+void turn_right()
 {
-  if(R_dist > S_THRESH)
+  while(!(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH))
   {
-    while(!(L_dist < S_THRESH && R_dist < S_THRESH))
-    {
-      R_v = OUT_V;
-      L_v = IN_V;
+    L_v = OUT_V;
+    R_v = IN_V;
 
-      analogWrite(R_EN, R_v);
-      analogWrite(L_EN, L_v);
-    }
-  }else 
-  {
-  while(!(L_dist < S_THRESH))
-    {
-      R_v = OUT_V;
-      L_v = IN_V;
-    
-      analogWrite(R_EN, R_v);
-      analogWrite(L_EN, L_v);
-    }
+    analogWrite(R_EN, R_v);
+    analogWrite(L_EN, L_v);
   }
 }
+void turn_left()
+{
+    while(!(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH))
+    {
+      R_v = OUT_V;
+      L_v = IN_V;
 
+      analogWrite(R_EN, R_v);
+      analogWrite(L_EN, L_v);
+    }
+}
+void U_turn(){
+    while(!(F_dist > F_THRESH))
+    {
+      digitalWrite(R_IN1, LOW);
+      digitalWrite(R_IN2, HIGH);
+      digitalWrite(L_IN1, HIGH);
+      digitalWrite(L_IN2, LOW);
+      
+      R_v = IN_V;
+      L_v = IN_V;
+
+      analogWrite(R_EN, R_v);
+      analogWrite(L_EN, L_v);
+    }
+}
 void setup()
 { 
-  state = advancing;
+  // state = advancing;
 
   Serial.begin(4800);
 
@@ -121,16 +142,27 @@ void loop()
   R_dist = R_dist >= 0? R_dist : 0;
   L_dist = L_hc.measureDistanceCm();
   L_dist = L_dist >= 0? L_dist : 0;
-  F_dist = C_hc.measureDistanceCm();
-  F_dist = C_dist >= 0? C_dist : 0;
+  F_dist = F_hc.measureDistanceCm();
+  F_dist = F_dist >= 0? F_dist : 0;
 
   // PRIORIRY: LEFT > FORWARD > RIGHT
-  state = (L_dist < S_THRESH) ? advancing : turning_left;
+  // state = (L_dist < S_THRESH) ? advancing : turning_left;
   
-  advance();
+if (L_dist>S_THRESH)
+  turn_left();
+else{
+  if(F_dist>F_THRESH)
+    advance();
+  else{
+    if (R_dist>S_THRESH)
+      turn_right();
+    else
+    U_turn();
+  }
+}
 
-  analogWrite(R_EN, R_v);
-  analogWrite(L_EN, L_v);
+
+
 
 
   Serial.print(R_dist);
