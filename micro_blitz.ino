@@ -3,17 +3,20 @@
 typedef UltraSonicDistanceSensor HCSR04;
 
 //SENSOR PINS
-float C_THRESH = 6; 
+float F_THRESH = 6; 
 // TO DO
 float S_THRESH = 11;
 float ERR_TRESH = 4;
 
-float OUT_V = 255;
-float IN_V = 0;
+// MOTOR PINS
+int Vmax =  100;
+int Vmin =  ;
+float OUT_V = Vmax;
+float IN_V = Vmin;
 
 float R_dist;
 float L_dist;
-float C_dist;
+float F_dist;
 
 int R_ECHO = 4;
 int R_TRIG = 5;
@@ -23,12 +26,11 @@ int L_ECHO = 2;
 int L_TRIG = 3;
 HCSR04 L_hc(L_TRIG, L_ECHO);
 
-int C_ECHO  = 6;
-int C_TRIG  = 7;
-HCSR04 C_hc(C_TRIG, C_ECHO);
+int F_ECHO  = 6;
+int F_TRIG  = 7;
+HCSR04 F_hc(F_TRIG, F_ECHO);
 
-// MOTOR PINS
-int Vmax =  100;
+
 
 int R_EN = 9; 
 int R_IN1 = 8;
@@ -40,7 +42,7 @@ int L_IN1 = 12;
 int L_IN2 = 13;
 int L_v = 0;
 
-enum states
+/*enum states
 {
   advancing,
   turning_left,
@@ -48,7 +50,7 @@ enum states
   stopping
 };
 enum states state = advancing; 
-
+*/
 void advance()
 {
   //stabilize
@@ -60,8 +62,7 @@ void advance()
   // Serial.println("stabilizing");
   // delay(200);
 
-  }else
-  {
+  }else {
   R_v = L_v = Vmax;
 
   // Serial.println("STRAIGHT");
@@ -120,8 +121,8 @@ void loop()
   R_dist = R_dist >= 0? R_dist : 0;
   L_dist = L_hc.measureDistanceCm();
   L_dist = L_dist >= 0? L_dist : 0;
-  C_dist = C_hc.measureDistanceCm();
-  C_dist = C_dist >= 0? C_dist : 0;
+  F_dist = C_hc.measureDistanceCm();
+  F_dist = C_dist >= 0? C_dist : 0;
 
   // PRIORIRY: LEFT > FORWARD > RIGHT
   state = (L_dist < S_THRESH) ? advancing : turning_left;
@@ -136,7 +137,7 @@ void loop()
   Serial.print("   ");
   Serial.print(L_dist);
   Serial.print("   ");
-  Serial.println(C_dist);
+  Serial.println(F_dist);
 
   
 }
