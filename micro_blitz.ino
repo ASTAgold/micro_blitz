@@ -1,12 +1,12 @@
 #include <HCSR04.h>
 
-typedef UltraSonicDistanceSensor HCSR04;
+
 
 //SENSOR PINS
 float F_THRESH = 12; 
 // TO DO
 float S_THRESH = 9;
-float ERR_TRESH = 4;
+float ERR_TRESH = 2;
 
 // MOTOR PINS
 int Vmax =  100;
@@ -42,68 +42,45 @@ int L_IN1 = 12;
 int L_IN2 = 13;
 int L_v = 0;
 
-/*enum states
-{
-  advancing,
-  turning_left,
-  turning_right,
-  stopping
-};
-enum states state = advancing; 
-*/
+
 
 float ease(float x)
 {
- return  x < 0.5
-  ? (1 - sqrt(1 - (2 * x, 2)*(2 * x, 2))) / 2
-  : (sqrt(1 - (-2 * x + 2)*(-2 * x + 2)) + 1) / 2;
+//  return  x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2)*(-2 * x + 2) / 2;
+  return sin((x * PI) / 2); 
 }
 
 void advance()
 {
   //stabilize
-  if(abs(R_dist - L_dist) > ERR_TRESH)
-  {
   R_v = (float)Vmax*ease((float)L_dist/(L_dist + R_dist));
   L_v = (float)Vmax*ease((float)R_dist/(L_dist + R_dist));
-  analogWrite(R_EN, R_v);
-  analogWrite(L_EN, L_v);
-  // Serial.println("stabilizing");
-  // delay(200);
-
-  }else {
-  R_v = L_v = Vmax;
-
-  // Serial.println("STRAIGHT");
-  // delay(200);
-  }
-
 }
 void turn_right()
 {
-  while(!(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH))
-  {
+ // while((R_dist > S_THRESH || F_dist < F_THRESH))
+ // {
     L_v = OUT_V;
     R_v = IN_V;
 
     analogWrite(R_EN, R_v);
     analogWrite(L_EN, L_v);
-  }
+ // }
 }
 void turn_left()
 {
-    while(!(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH))
-    {
+    //while((L_dist > S_THRESH && F_dist < F_THRESH))
+    //{
       R_v = OUT_V;
       L_v = IN_V;
 
       analogWrite(R_EN, R_v);
       analogWrite(L_EN, L_v);
-    }
+   // }
 }
 void U_turn(){
-    while(!(F_dist > F_THRESH))
-    {
+   // while((F_dist < F_THRESH))
+  //  {
       digitalWrite(R_IN1, LOW);
       digitalWrite(R_IN2, HIGH);
       digitalWrite(L_IN1, HIGH);
@@ -114,18 +91,20 @@ void U_turn(){
 
       analogWrite(R_EN, R_v);
       analogWrite(L_EN, L_v);
-    }
+  //  }
 }
 void setup()
 { 
   // state = advancing;
 
-  Serial.begin(4800);
+  Serial.begin(9600);
 
-  pinMode(L_EN, OUTPUT);
-  pinMode(L_IN1, OUTPUT);
-  pinMode(L_IN2, OUTPUT);
-
+  pinMode(L_EN,OUTPUT);
+  pinMode(L_IN1,OUTPUT);
+  pinMode(L_IN2,OUTPUT);
+  pinMode(R_EN,OUTPUT);
+  pinMode(R_IN1,OUTPUT);
+  pinMode(R_IN2,OUTPUT);
 
 }
 
@@ -135,43 +114,31 @@ void loop()
     
   digitalWrite(R_IN1, LOW);
   digitalWrite(R_IN2, HIGH);
-  digitalWrite(L_IN1, LOW);
-  digitalWrite(L_IN2, HIGH);
+  digitalWrite(L_IN2, LOW);
+  digitalWrite(L_IN1, HIGH);
 
-  R_dist = R_hc.measureDistanceCm();
-  R_dist = R_dist >= 0? R_dist : 0;
-  L_dist = L_hc.measureDistanceCm();
-  L_dist = L_dist >= 0? L_dist : 0;
-  F_dist = F_hc.measureDistanceCm();
-  F_dist = F_dist >= 0? F_dist : 0;
+  R_dist = R_hc.dist();
+  //R_dist = R_dist >= 0? R_dist : 0;
+  L_dist = L_hc.dist();
+  //L_dist = L_dist >= 0? L_dist : 0;
+  F_dist = F_hc.dist();
+  //F_dist = F_dist >= 0? F_dist : 0;
 
-  // PRIORIRY: LEFT > FORWARD > RIGHT
-  // state = (L_dist < S_THRESH) ? advancing : turning_left;
   
-if (L_dist>S_THRESH)
-  turn_left();
-else{
-  if(F_dist>F_THRESH)
-    advance();
-  else{
-    if (R_dist>S_THRESH)
-      turn_right();
-    else
-    U_turn();
-  }
-}
-
-
-
-
-
-  Serial.print(R_dist);
-  Serial.print("   ");
   Serial.print(L_dist);
   Serial.print("   ");
-  Serial.println(F_dist);
+  Serial.print(F_dist);
+  Serial.print("   ");
+  Serial.print(R_dist);
+  Serial.print("            ");
+  Serial.print(R_v);
+  Serial.print("   ");
+  Serial.println(L_v);  
 
+  advance();
   
+        analogWrite(R_EN, R_v);
+      analogWrite(L_EN, L_v);
 }
 
 
