@@ -1,6 +1,6 @@
 #include <HCSR04.h>
 
-//SENSOR P  INS
+//SENSOR PINS
 float F_THRESH = 12; 
 // TO DO
 float S_THRESH = 9;
@@ -39,6 +39,14 @@ int L_IN1 = 12;
 int L_IN2 = 13;
 int L_v = 0;
 
+enum states
+{
+  advancing,
+  turning_left,
+  turning_right,
+  turning_U,
+  self_destruct
+}state;
 
 float ease(float x)
 {
@@ -54,44 +62,27 @@ void advance()
 }
 void turn_right()
 {
- // while((R_dist > S_THRESH || F_dist < F_THRESH))
- // {
-    L_v = OUT_V;
-    R_v = IN_V;
-
-    analogWrite(R_EN, R_v);
-    analogWrite(L_EN, L_v);
- // }
+  L_v = OUT_V;
+  R_v = IN_V;
 }
 void turn_left()
 {
-    //while((L_dist > S_THRESH && F_dist < F_THRESH))
-    //{
-      R_v = OUT_V;
-      L_v = IN_V;
-
-      analogWrite(R_EN, R_v);
-      analogWrite(L_EN, L_v);
-   // }
+  R_v = OUT_V;
+  L_v = IN_V;
 }
-void U_turn(){
-   // while((F_dist < F_THRESH))
-  //  {
-      digitalWrite(R_IN1, LOW);
-      digitalWrite(R_IN2, HIGH);
-      digitalWrite(L_IN1, HIGH);
-      digitalWrite(L_IN2, LOW);
+void U_turn()
+{
+  digitalWrite(R_IN1, LOW);
+  digitalWrite(R_IN2, HIGH);
+  digitalWrite(L_IN1, HIGH);
+  digitalWrite(L_IN2, LOW);
       
-      R_v = IN_V;
-      L_v = IN_V;
-
-      analogWrite(R_EN, R_v);
-      analogWrite(L_EN, L_v);
-  //  }
+  R_v = IN_V;
+  L_v = IN_V;
 }
 void setup()
 { 
-  // state = advancing;
+  state = advancing;
 
   Serial.begin(9600);
 
@@ -106,7 +97,6 @@ void setup()
 
 void loop()
 {
-    
   digitalWrite(R_IN1, LOW);
   digitalWrite(R_IN2, HIGH);
   digitalWrite(L_IN2, LOW);
@@ -119,7 +109,74 @@ void loop()
   F_dist = F_hc.dist();
   //F_dist = F_dist >= 0? F_dist : 0;
 
+  // determine next state
+  switch (state)
+  {
+    case advancing:
+      if(L_dist > S_THRESH)
+      {
+        state = turning_left;
+      }else if(F_dist > F_THRESH)
+      {
+        state = advancing;
+      }else if(R_dist > S_THRESH)
+      {
+        state = turning_right;
+      }else
+      {
+        state = turning_U;
+      }
+      break;
+
+    case turning_left:
+      if(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH)
+      {
+        state = advancing;
+      }
+      break;
+      
+    case turning_right:
+      if(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH)
+      {
+        state = advancing;
+      }
+      break;
+      
+    case turning_U:
+      if(F_dist > F_THRESH)
+      {
+        state = advancing;
+      }
+      break;
+            
+  };
+
+
+  // action
+  switch (state)
+  {
+    case advancing:
+      advance();
+      break;
+
+    case turning_left:
+      turn_left();
+      break;
+
+    case turning_right:
+      turn_right();
+      break;
+
+    case turning_U:
+      U_turn();
+      break;
+
+  };
+
+  analogWrite(R_EN, R_v);
+  analogWrite(L_EN, L_v);
   
+  //debug prints
   Serial.print(L_dist);
   Serial.print("   ");
   Serial.print(F_dist);
@@ -129,11 +186,6 @@ void loop()
   Serial.print(R_v);
   Serial.print("   ");
   Serial.println(L_v);  
-
-  advance();
-  
-  analogWrite(R_EN, R_v);
-  analogWrite(L_EN, L_v);
 }
 
 
