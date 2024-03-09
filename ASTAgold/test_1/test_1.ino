@@ -1,16 +1,18 @@
+#include <MPU6050.h>
+
 #include <HCSR04.h>
 
 //SENSOR PINS
 float F_THRESH = 12; 
 // TO DO
-float S_THRESH = 9;
+float S_THRESH = 12;
 float ERR_TRESH = 2;
 
 // MOTOR PINS
-int Vmax =  100;
+int Vmax =  180;
 
 int OUT_V = Vmax;
-int IN_V = 60;
+int IN_V = 100;
 
 float R_dist;
 float L_dist;
@@ -57,8 +59,11 @@ float ease(float x)
 void advance()
 {
   //stabilize
+if(abs(R_dist - L_dist) > ERR_TRESH){
   R_v = (float)Vmax*ease((float)L_dist/(L_dist + R_dist));
   L_v = (float)Vmax*ease((float)R_dist/(L_dist + R_dist));
+}else
+  R_v = L_v = Vmax;
 }
 void turn_right()
 {
@@ -129,14 +134,14 @@ void loop()
       break;
 
     case turning_left:
-      if(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH)
+      if(L_dist < S_THRESH && R_dist < S_THRESH)
       {
         state = advancing;
       }
       break;
       
     case turning_right:
-      if(L_dist < S_THRESH && R_dist < S_THRESH && F_dist > F_THRESH)
+      if(L_dist < S_THRESH && R_dist < S_THRESH)
       {
         state = advancing;
       }
@@ -183,9 +188,9 @@ void loop()
   Serial.print("   ");
   Serial.print(R_dist);
   Serial.print("            ");
-  Serial.print(R_v);
+  Serial.print(L_v);
   Serial.print("   ");
-  Serial.println(L_v);  
+  Serial.println(R_v);  
 }
 
 
