@@ -12,6 +12,8 @@ int Vmax =  100;
 int OUT_V = Vmax;
 int IN_V = 60;
 
+int Vs = {60, 80, 100};
+
 float R_dist;
 float L_dist;
 float F_dist;
@@ -49,8 +51,8 @@ float ease(float x)
 void advance()
 {
   //stabilize
-  R_v = (float)Vmax*ease((float)L_dist/(L_dist + R_dist));
-  L_v = (float)Vmax*ease((float)R_dist/(L_dist + R_dist));
+  R_v = Vs[floor(L_dist/(L_dist + R_dist) * (n-1))];
+  L_v = Vs[floor(R_dist/(L_dist + R_dist) * (n-1))];
 }
 void turn_right()
 {
