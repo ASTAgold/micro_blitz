@@ -157,18 +157,22 @@ void loop()
   {
     case advancing:
       advance();
+      // Serial.println("ADVANCE");
       break;
 
     case turning_left:
       turn_left();
+      // Serial.println("LEFT");
       break;
 
     case turning_right:
       turn_right();
+      // Serial.println("RIGHT");
       break;
 
     case turning_U:
       U_turn();
+      // Serial.println("UUUUUUU");
       break;
 
   };
