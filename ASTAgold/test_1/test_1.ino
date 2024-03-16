@@ -3,16 +3,19 @@
 #include <HCSR04.h>
 
 //SENSOR PINS
-float F_THRESH = 12; 
+float F_THRESH = 20; 
 // TO DO
-float S_THRESH = 12;
+float S_THRESH = 15;
 float ERR_TRESH = 2;
 
 // MOTOR PINS
-int Vmax =  180;
+int Vmax =  100;
 
 int OUT_V = Vmax;
 int IN_V = 100;
+
+int Vs[5] = {60,80,100};
+int n=5;
 
 float R_dist;
 float L_dist;
@@ -59,21 +62,26 @@ float ease(float x)
 void advance()
 {
   //stabilize
-if(abs(R_dist - L_dist) > ERR_TRESH){
-  R_v = (float)Vmax*ease((float)L_dist/(L_dist + R_dist));
-  L_v = (float)Vmax*ease((float)R_dist/(L_dist + R_dist));
-}else
-  R_v = L_v = Vmax;
+  R_v = Vs[(int)floor(L_dist/(L_dist + R_dist) * (n-1))];
+  L_v = Vs[(int)floor(R_dist/(L_dist + R_dist) * (n-1))];
 }
 void turn_right()
 {
-  L_v = OUT_V;
-  R_v = IN_V;
+  // L_v = OUT_V;
+  // R_v = IN_V;
+
+  R_v = 0;
+  L_v = 0;
+  delay(2000);
 }
 void turn_left()
 {
-  R_v = OUT_V;
-  L_v = IN_V;
+  // R_v = OUT_V;
+  // L_v = IN_V;
+
+  R_v = 0;
+  L_v = 0;
+  delay(2000);
 }
 void U_turn()
 {
@@ -119,7 +127,8 @@ void loop()
   {
     case advancing:
       if(L_dist > S_THRESH)
-      {
+      {   R_v = 0;
+          L_v = 0;
         state = turning_left;
       }else if(F_dist > F_THRESH)
       {

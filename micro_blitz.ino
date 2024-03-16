@@ -12,7 +12,8 @@ int Vmax =  100;
 int OUT_V = Vmax;
 int IN_V = 60;
 
-int Vs = {60, 80, 100};
+int Vs[1] = {80};
+int n=1;
 
 float R_dist;
 float L_dist;
@@ -51,8 +52,8 @@ float ease(float x)
 void advance()
 {
   //stabilize
-  R_v = Vs[floor(L_dist/(L_dist + R_dist) * (n-1))];
-  L_v = Vs[floor(R_dist/(L_dist + R_dist) * (n-1))];
+  R_v = Vs[(int)floor(L_dist/(L_dist + R_dist) * (n-1))];
+  L_v = Vs[(int)floor(R_dist/(L_dist + R_dist) * (n-1))];
 }
 void turn_right()
 {
@@ -133,6 +134,7 @@ void loop()
   Serial.println(L_v);  
 
   advance();
+  delay(50);
   
   analogWrite(R_EN, R_v);
   analogWrite(L_EN, L_v);
