@@ -66,7 +66,7 @@ void advance()
   L_v = Vs[(int)floor(R_dist/(L_dist + R_dist) * (n-1))];
 }
 void turn_right()
-{
+{     
   // L_v = OUT_V;
   // R_v = IN_V;
 

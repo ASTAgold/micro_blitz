@@ -9,7 +9,7 @@ int L_IN2 = 13;
 int v1 = 50;
 int v2 = 50;
 
-int button1 = 0;
+int button1 = 1;
 int button2 = 0;
 
 
@@ -51,7 +51,6 @@ void loop() {
 
     delay(200);
   }
-
   digitalWrite(R_IN1, LOW);
   digitalWrite(R_IN2, HIGH);
   digitalWrite(L_IN2, LOW);
