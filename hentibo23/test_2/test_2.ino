@@ -2,7 +2,7 @@
 
 #include <HCSR04.h>
 
-float F_THRESH = 10; 
+float F_THRESH = 15; 
 float S_THRESH = 10;
 
 
