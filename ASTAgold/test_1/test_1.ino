@@ -3,16 +3,16 @@
 #include <HCSR04.h>
 
 //SENSOR PINS
-float F_THRESH = 20; 
+float F_THRESH = 5; 
 // TO DO
-float S_THRESH = 15;
+float S_THRESH = 5;
 float ERR_TRESH = 2;
 
 // MOTOR PINS
-int Vmax =  100;
+int Vmax =  140;
 
 int OUT_V = Vmax;
-int IN_V = 100;
+int IN_V = 80;
 
 int Vs[5] = {60,80,100};
 int n=5;
@@ -67,21 +67,13 @@ void advance()
 }
 void turn_right()
 {     
-  // L_v = OUT_V;
-  // R_v = IN_V;
-
-  R_v = 0;
-  L_v = 0;
-  delay(2000);
+   L_v = OUT_V;
+   R_v = IN_V;
 }
 void turn_left()
 {
-  // R_v = OUT_V;
-  // L_v = IN_V;
-
-  R_v = 0;
-  L_v = 0;
-  delay(2000);
+   R_v = OUT_V;
+   L_v = IN_V;
 }
 void U_turn()
 {
@@ -127,8 +119,7 @@ void loop()
   {
     case advancing:
       if(L_dist > S_THRESH)
-      {   R_v = 0;
-          L_v = 0;
+      {
         state = turning_left;
       }else if(F_dist > F_THRESH)
       {
