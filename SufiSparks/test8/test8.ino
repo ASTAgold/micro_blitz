@@ -7,13 +7,16 @@ float F_dist;
 //Distances Between Sensors and the Wall
 int F_THRESH = 12; //Fornt
 int S_THRESH = 10; //Max Side
-int SC_THRESH = 3;  //Min Side
+int SC_THRESH = 7;  //Min Side
 
 //Vitess
 int Vs_L = 70;
 float Vs_R = 71.754744;
 int VCmin = 60;
-int Vcmax = 120;
+int Vcmax = 100;
+int Vmax = 80;
+
+int SC_delay = 2``50;
 
 int R_ECHO = 4;
 int R_TRIG = 5;
@@ -81,30 +84,38 @@ void advance_st(){
 
 if (L_dist < SC_THRESH)
   {
-    if (L_v < Vcmax)
+    if (L_v < Vmax)
     {
-      L_v+=5;
-      R_v-=5;
+      L_v+=2;
+      R_v-=2;
+
+      delay(SC_delay);
     }else
     {
-      L_v-=5;
-      R_v-=15;
+      L_v-=2;
+      R_v-=6;
+
+      delay(SC_delay);
     }
   }else if (R_dist < SC_THRESH)
   {
-    if(R_v < Vcmax)
+    if(R_v < Vmax)
     {
-      R_v+=5;
-      L_v-=5;
+      R_v+=2;
+      L_v-=2;
+
+      delay(SC_delay);
     }else
     {
-      R_v-=5;
-      L_v-=15;
+      R_v-=2;
+      L_v-=6;
+
+      delay(SC_delay);
     }
   }
 
   L_v = max(min(L_v, Vcmax), VCmin);
-  R_v = max(min(R_v, Vcmax), VCmin);
+  R_v =   (min(R_v, Vcmax), VCmin);
 
   
 
@@ -154,39 +165,41 @@ void loop() {
   Serial.print(" | Left = ");
   Serial.print(L_dist);
 
-  if(F_dist >= F_THRESH){
-    if(L_dist >= S_THRESH){
-      stop(1000);
-      turn_left();
-      delay(560);
-      Serial.print(" | Left");
-      advance();
-      delay(350);
-    }
-    advance_st();
-    Serial.print(" | Advance");
-  }else if(F_dist < F_THRESH && L_dist >= S_THRESH){
-    stop(1000);
-    turn_left();
-    delay(560);
-    Serial.print(" | Left");
-    advance();
-    delay(350);  
-  }else if(F_dist < F_THRESH && R_dist >= S_THRESH){
-    stop(1000);
-    turn_right();
-    delay(558);
-    Serial.print(" | Right");
-    advance();
-    delay(350);
-  }else if (F_dist < F_THRESH && R_dist < S_THRESH && L_dist < S_THRESH) {
-    stop(1000);
-    u_turn();
-    delay(560);
-    Serial.print(" | U-Turn");
-    advance();
-    delay(350);
-  }
+  // if(F_dist >= F_THRESH){
+  //   if(L_dist >= S_THRESH){
+  //     stop(1000);
+  //     turn_left();
+  //     delay(560);
+  //     Serial.print(" | Left");
+  //     advance();
+  //     delay(350);
+  //   }
+  //   advance_st();
+  //   Serial.print(" | Advance");
+  // }else if(F_dist < F_THRESH && L_dist >= S_THRESH){
+  //   stop(1000);
+  //   turn_left();
+  //   delay(560);
+  //   Serial.print(" | Left");
+  //   advance();
+  //   delay(350);  
+  // }else if(F_dist < F_THRESH && R_dist >= S_THRESH){
+  //   stop(1000);
+  //   turn_right();
+  //   delay(558);
+  //   Serial.print(" | Right");
+  //   advance();
+  //   delay(350);
+  // }else if (F_dist < F_THRESH && R_dist < S_THRESH && L_dist < S_THRESH) {
+  //   stop(1000);
+  //   u_turn();
+  //   delay(560);
+  //   Serial.print(" | U-Turn");
+  //   advance();
+  //   delay(350);
+  // }
+
+  advance_st();
 }
 
 
